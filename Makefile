@@ -1,38 +1,46 @@
 #  Use gimptool-2.0 to sett these variables
+PLUGIN=fourier
+VERSION=0.4.1
 GIMPTOOL=gimptool-2.0
 PLUGIN_BUILD=$(GIMPTOOL) --build
 PLUGIN_INSTALL=$(GIMPTOOL) --install-bin
 GCC=g++
+CFLAGS=-Wall -O2 $(shell pkg-config fftw3 gimp-2.0 --cflags)
 LIBS=$(shell pkg-config fftw3 gimp-2.0 --libs)
-CFLAGS=-O2 $(shell pkg-config fftw3 gimp-2.0 --cflags)
-VERSION=0.4.1
-DIR=fourier-$(VERSION)
+DIR=$(PLUGIN)-$(VERSION)
+MKDIR=mkdir
+COPY=cp
+TAR=tar
+RM=rm -f
 
 export
 
 FILES= \
-    fourier.c \
+    $(PLUGIN).c \
     Makefile \
     Makefile.win \
     README \
     README.Moire \
-    fourier.dev
+    $(PLUGIN).dev
 
 all: fourier
 
 # Use of pkg-config is the recommended way
-fourier: fourier.c
-	$(GCC) $(CFLAGS) $(LIBS) -o fourier fourier.c  
+$(PLUGIN): $(PLUGIN).o
+	$(GCC) $^ $(LIBS) -o $@
+
+$(PLUGIN).o: $(PLUGIN).c
+	$(GCC) $(CFLAGS) -c $< -o $@
 
 # To avoid gimptool use, just copy the fourier in the directory you want
-install: fourier
-	$(PLUGIN_INSTALL) fourier
+install: $(PLUGIN)
+	$(PLUGIN_INSTALL) $(PLUGIN)
 	 
 dist:
-	mkdir $(DIR)
-	cp $(FILES) $(DIR)
-	tar czf "$(DIR).tar.gz" $(DIR)
-	rm -Rf $(DIR)
+	$(MKDIR) $(DIR)
+	$(COPY) $(FILES) $(DIR)
+	$(TAR) -czf "$(DIR).tar.gz" $(DIR)
+	$(RM) -R $(DIR)
    
 clean:
-	rm -f fourier
+	$(RM) $(PLUGIN).o $(PLUGIN)
