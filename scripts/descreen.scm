@@ -60,7 +60,9 @@
 
     ; Fill the picture according to the selection.
     ; Foreground color has been set by the FFT plugin to #808080
-    (gimp-edit-fill drawable 0)
+    (if (= (car (gimp-selection-is-empty image)) FALSE)
+      (gimp-edit-fill drawable 0)
+    )
 
     ; Delete the detection layer
     (gimp-image-remove-layer image detection)
